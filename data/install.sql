@@ -57,11 +57,4 @@ INSERT INTO `core_form_button` (`Button_ID`, `label`, `icon`, `title`, `href`, `
 INSERT INTO `core_form_field` (`Field_ID`, `type`, `label`, `fieldkey`, `tab`, `form`, `class`, `url_view`, `url_ist`, `show_widget_left`, `allow_clear`, `readonly`, `tbl_cached_name`, `tbl_class`, `tbl_permission`) VALUES
 (NULL, 'text', 'Name', 'label', 'translation-base', 'translation-single', 'col-md-3', '/translation/view/##ID##', '', 0, 1, 0, '', '', '');
 
---
--- Default Widgets
---
-INSERT INTO `core_widget` (`Widget_ID`, `widget_name`, `label`, `permission`) VALUES
-(NULL, 'translation_dailystats', 'Translation - Daily Stats', 'index-Translation\\Controller\\TranslationController'),
-(NULL, 'translation_taginfo', 'Translation - Tag Info', 'index-Translation\\Controller\\TranslationController');
-
 COMMIT;
