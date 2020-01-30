@@ -18,7 +18,8 @@
     },
     "require": {
         "php": "^7.1",
-        "oneplace/oneplace-core": "^1.0.0"
+        "oneplace/oneplace-core": "^1.0.0",
+        "gettext/gettext": "^5.2"
     },
     "autoload": {
         "psr-4": {
