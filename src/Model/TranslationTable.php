@@ -60,6 +60,13 @@ class TranslationTable extends CoreEntityTable {
                 # its a like
                 $oWh->like(substr($sWh,0,strlen($sWh)-strlen('-like')),$aWhere[$sWh].'%');
             }
+            $bIsIDFS = stripos($sWh,'_idfs');
+            if($bIsIDFS === false) {
+
+            } else {
+                # its a like
+                $oWh->equalTo($sWh,$aWhere[$sWh]);
+            }
         }
         $oSel->where($oWh);
 

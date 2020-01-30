@@ -23,6 +23,9 @@ use OnePlace\Translation\Model\Translation;
 use OnePlace\Translation\Model\TranslationTable;
 use Laminas\View\Model\ViewModel;
 use Laminas\Db\Adapter\AdapterInterface;
+use Gettext\Translations;
+use Gettext\Loader\PoLoader;
+use Gettext\Generator\MoGenerator;
 
 class TranslationController extends CoreController {
     /**
@@ -31,6 +34,14 @@ class TranslationController extends CoreController {
      * @since 1.0.0
      */
     private $oTableGateway;
+
+    /**
+     * Active languages
+     *
+     * @var array $aLanguages
+     *@since 1.0.0
+     */
+    public static $aLanguages = [];
 
     /**
      * TranslationController constructor.
@@ -42,6 +53,7 @@ class TranslationController extends CoreController {
     public function __construct(AdapterInterface $oDbAdapter,TranslationTable $oTableGateway,$oServiceManager) {
         $this->oTableGateway = $oTableGateway;
         $this->sSingleForm = 'translation-single';
+        TranslationController::$aLanguages = ['en_US','de_DE'];
         parent::__construct($oDbAdapter,$oTableGateway,$oServiceManager);
 
         if($oTableGateway) {
@@ -142,6 +154,11 @@ class TranslationController extends CoreController {
         # Save Multiselect
         $this->updateMultiSelectFields($_REQUEST,$oTranslation,'translation-single');
 
+        # Re-generate language files
+        foreach(TranslationController::$aLanguages as $sLang) {
+            $this->generateLanguageFiles($sLang);
+        }
+
         # Log Performance in DB
         $aMeasureEnd = getrusage();
         $this->logPerfomance('translation-save',$this->rutime($aMeasureEnd,CoreController::$aPerfomanceLogStart,"utime"),$this->rutime($aMeasureEnd,CoreController::$aPerfomanceLogStart,"stime"));
@@ -223,6 +240,11 @@ class TranslationController extends CoreController {
         # Save Multiselect
         $this->updateMultiSelectFields($aFormData,$oTranslation,'translation-single');
 
+        # Re-generate language files
+        foreach(TranslationController::$aLanguages as $sLang) {
+            $this->generateLanguageFiles($sLang);
+        }
+
         # Log Performance in DB
         $aMeasureEnd = getrusage();
         $this->logPerfomance('translation-save',$this->rutime($aMeasureEnd,CoreController::$aPerfomanceLogStart,"utime"),$this->rutime($aMeasureEnd,CoreController::$aPerfomanceLogStart,"stime"));
@@ -279,5 +301,73 @@ class TranslationController extends CoreController {
             'sFormName'=>$this->sSingleForm,
             'oTranslation'=>$oTranslation,
         ]);
+    }
+
+    /**
+     * Generate PO and MO files for selected language
+     *
+     * @param string $sLang
+     * @return bool false no viewfile
+     * @since 1.0.0
+     */
+    public function generateLanguageFiles($sLang = 'en_US') {
+        $this->layout('layout/json');
+
+        $this->createpofile($sLang);
+
+        //Load a PO file
+        $poLoader = new PoLoader();
+
+        $translations = $poLoader->loadFile(__DIR__.'/../../language/'.$sLang.'.po');
+
+        //Save to MO file
+        $moGenerator = new MoGenerator();
+
+        $moGenerator->generateFile($translations, __DIR__.'/../../language/'.$sLang.'.mo');
+
+        //Or return as a string
+        $content = $moGenerator->generateString($translations);
+        file_put_contents(__DIR__.'/../../language/'.$sLang.'.mo', $content);
+
+        return false;
+    }
+
+    /**
+     * Create PO File for Language
+     *
+     * @param $sLang language
+     * @since 1.0.0
+     */
+    private function createpofile($sLang) {
+
+        # begin po file
+        $sFile = "msgid \"\"\nmsgstr \"\"\n";
+
+        # languages are translation categories so we need category tag
+        $oTag = CoreController::$aCoreTables['core-tag']->select(['tag_key'=>'category']);
+        if(count($oTag)) {
+            $oTag = $oTag->current();
+
+            $oEntityTag = CoreController::$aCoreTables['core-entity-tag']->select(['tag_idfs'=>$oTag->Tag_ID,'entity_form_idfs'=>'translation-single','tag_value'=>$sLang]);
+            if(count($oEntityTag) > 0) {
+                # load language (entity tag)
+                $oEntityTag = $oEntityTag->current();
+
+                # add translations to file
+                $aTranslations = $this->oTableGateway->fetchAll(false,['language_idfs'=>$oEntityTag->Entitytag_ID]);
+                if(count($aTranslations) > 0) {
+                    foreach($aTranslations as $oTrans) {
+                        $sFile .= "\nmsgid \"".$oTrans->label."\"";
+                        $sFile .= "\nmsgstr \"".$oTrans->translation."\"";
+                        $sFile .= "\n";
+                    }
+                }
+
+                $sFile .= "\n";
+
+                # save po file
+                file_put_contents(__DIR__.'/../../language/'.$sLang.'.po',$sFile);
+            }
+        }
     }
 }
