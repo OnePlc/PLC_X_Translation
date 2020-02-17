@@ -74,6 +74,11 @@ class TranslationController extends CoreController {
         # Set Layout based on users theme
         $this->setThemeBasedLayout('translation');
 
+        # Add Links for Breadcrumb
+        $this->layout()->aNavLinks = [
+            (object)['label'=>'Translations']
+        ];
+
         # Check license
         if(!$this->checkLicense('translation')) {
             $this->flashMessenger()->addErrorMessage('You have no active license for translation');
@@ -113,6 +118,12 @@ class TranslationController extends CoreController {
         # Set Layout based on users theme
         $this->setThemeBasedLayout('translation');
 
+        # Add Links for Breadcrumb
+        $this->layout()->aNavLinks = [
+            (object)['label'=>'Translations','href'=>'/translation'],
+            (object)['label'=>'Add Translation'],
+        ];
+
         # Check license
         if(!$this->checkLicense('translation')) {
             $this->flashMessenger()->addErrorMessage('You have no active license for translation');
@@ -146,7 +157,7 @@ class TranslationController extends CoreController {
         $aFormData = $this->parseFormData($_REQUEST);
 
         # Save Add Form
-        $oTranslation = new Translation($this->oDbAdapter);
+        $oTranslation = new Translation(CoreController::$oDbAdapter);
         $oTranslation->exchangeArray($aFormData);
         $iTranslationID = $this->oTableGateway->saveSingle($oTranslation);
         $oTranslation = $this->oTableGateway->getSingle($iTranslationID);
@@ -177,6 +188,12 @@ class TranslationController extends CoreController {
     public function editAction() {
         # Set Layout based on users theme
         $this->setThemeBasedLayout('translation');
+
+        # Add Links for Breadcrumb
+        $this->layout()->aNavLinks = [
+            (object)['label'=>'Translations','href'=>'/translation'],
+            (object)['label'=>'Edit Translation'],
+        ];
 
         # Check license
         if(!$this->checkLicense('translation')) {
@@ -245,6 +262,8 @@ class TranslationController extends CoreController {
             $this->generateLanguageFiles($sLang);
         }
 
+        return false;
+
         # Log Performance in DB
         $aMeasureEnd = getrusage();
         $this->logPerfomance('translation-save',$this->rutime($aMeasureEnd,CoreController::$aPerfomanceLogStart,"utime"),$this->rutime($aMeasureEnd,CoreController::$aPerfomanceLogStart,"stime"));
@@ -293,6 +312,12 @@ class TranslationController extends CoreController {
         # Load Fields for View Form
         $this->setFormFields($this->sSingleForm);
 
+        # Add Links for Breadcrumb
+        $this->layout()->aNavLinks = [
+            (object)['label'=>'Translations','href'=>'/translation'],
+            (object)['label'=>$oTranslation->getLabel()],
+        ];
+
         # Log Performance in DB
         $aMeasureEnd = getrusage();
         $this->logPerfomance('translation-view',$this->rutime($aMeasureEnd,CoreController::$aPerfomanceLogStart,"utime"),$this->rutime($aMeasureEnd,CoreController::$aPerfomanceLogStart,"stime"));
@@ -313,10 +338,16 @@ class TranslationController extends CoreController {
     public function generateLanguageFiles($sLang = 'en_US') {
         $this->layout('layout/json');
 
+        //echo 'gen files for '.$sLang;
+
         $this->createpofile($sLang);
 
         //Load a PO file
         $poLoader = new PoLoader();
+
+        if(!file_exists(__DIR__.'/../../language/'.$sLang.'.po')) {
+            file_put_contents(__DIR__.'/../../language/'.$sLang.'.po',"msgid \"\"\nmsgstr \"\"\n");
+        }
 
         $translations = $poLoader->loadFile(__DIR__.'/../../language/'.$sLang.'.po');
 
@@ -326,8 +357,9 @@ class TranslationController extends CoreController {
         $moGenerator->generateFile($translations, __DIR__.'/../../language/'.$sLang.'.mo');
 
         //Or return as a string
-        $content = $moGenerator->generateString($translations);
-        file_put_contents(__DIR__.'/../../language/'.$sLang.'.mo', $content);
+        //$content = $moGenerator->generateString($translations);
+        //var_dump($content);
+        //file_put_contents(__DIR__.'/../../language/'.$sLang.'.mo', $content);
 
         return false;
     }

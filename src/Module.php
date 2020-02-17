@@ -31,7 +31,7 @@ class Module {
      *
      * @since 1.0.2
      */
-    const VERSION = '1.0.2';
+    const VERSION = '1.0.3';
     /**
      * Load module config file
      *
@@ -80,6 +80,14 @@ class Module {
                 Controller\ApiController::class => function($container) {
                     $oDbAdapter = $container->get(AdapterInterface::class);
                     return new Controller\ApiController(
+                        $oDbAdapter,
+                        $container->get(Model\TranslationTable::class),
+                        $container
+                    );
+                },
+                Controller\InstallController::class => function($container) {
+                    $oDbAdapter = $container->get(AdapterInterface::class);
+                    return new Controller\InstallController(
                         $oDbAdapter,
                         $container->get(Model\TranslationTable::class),
                         $container
