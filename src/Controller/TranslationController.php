@@ -17,7 +17,7 @@ declare(strict_types=1);
 
 namespace OnePlace\Translation\Controller;
 
-use Application\Controller\CoreController;
+use Application\Controller\CoreEntityController;
 use Application\Model\CoreEntityModel;
 use OnePlace\Translation\Model\Translation;
 use OnePlace\Translation\Model\TranslationTable;
@@ -27,14 +27,7 @@ use Gettext\Translations;
 use Gettext\Loader\PoLoader;
 use Gettext\Generator\MoGenerator;
 
-class TranslationController extends CoreController {
-    /**
-     * Translation Table Object
-     *
-     * @since 1.0.0
-     */
-    private $oTableGateway;
-
+class TranslationController extends CoreEntityController {
     /**
      * Active languages
      *
@@ -71,41 +64,7 @@ class TranslationController extends CoreController {
      * @return ViewModel - View Object with Data from Controller
      */
     public function indexAction() {
-        # Set Layout based on users theme
-        $this->setThemeBasedLayout('translation');
-
-        # Add Links for Breadcrumb
-        $this->layout()->aNavLinks = [
-            (object)['label'=>'Translations']
-        ];
-
-        # Check license
-        if(!$this->checkLicense('translation')) {
-            $this->flashMessenger()->addErrorMessage('You have no active license for translation');
-            $this->redirect()->toRoute('home');
-        }
-
-        # Add Buttons for breadcrumb
-        $this->setViewButtons('translation-index');
-
-        # Set Table Rows for Index
-        $this->setIndexColumns('translation-index');
-
-        # Get Paginator
-        $oPaginator = $this->oTableGateway->fetchAll(true);
-        $iPage = (int) $this->params()->fromQuery('page', 1);
-        $iPage = ($iPage < 1) ? 1 : $iPage;
-        $oPaginator->setCurrentPageNumber($iPage);
-        $oPaginator->setItemCountPerPage(3);
-
-        # Log Performance in DB
-        $aMeasureEnd = getrusage();
-        $this->logPerfomance('translation-index',$this->rutime($aMeasureEnd,CoreController::$aPerfomanceLogStart,"utime"),$this->rutime($aMeasureEnd,CoreController::$aPerfomanceLogStart,"stime"));
-
-        return new ViewModel([
-            'sTableName'=>'translation-index',
-            'aItems'=>$oPaginator,
-        ]);
+        return $this->generateIndexView('translation');
     }
 
     /**
@@ -261,8 +220,6 @@ class TranslationController extends CoreController {
         foreach(TranslationController::$aLanguages as $sLang) {
             $this->generateLanguageFiles($sLang);
         }
-
-        return false;
 
         # Log Performance in DB
         $aMeasureEnd = getrusage();
