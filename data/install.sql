@@ -4,6 +4,7 @@
 CREATE TABLE `translation` (
   `Translation_ID` int(11) NOT NULL,
   `label` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `translatable` tinyint(1) NOT NULL DEFAULT 1,
   `created_by` int(11) NOT NULL,
   `created_date` datetime NOT NULL,
   `modified_by` int(11) NOT NULL,
@@ -55,6 +56,12 @@ INSERT INTO `core_form_button` (`Button_ID`, `label`, `icon`, `title`, `href`, `
 -- Fields
 --
 INSERT INTO `core_form_field` (`Field_ID`, `type`, `label`, `fieldkey`, `tab`, `form`, `class`, `url_view`, `url_list`, `show_widget_left`, `allow_clear`, `readonly`, `tbl_cached_name`, `tbl_class`, `tbl_permission`) VALUES
-(NULL, 'text', 'Name', 'label', 'translation-base', 'translation-single', 'col-md-3', '/translation/view/##ID##', '', 0, 1, 0, '', '', '');
+(NULL, 'text', 'Name', 'label', 'translation-base', 'translation-single', 'col-md-3', '/translation/view/##ID##', '', 0, 1, 0, '', '', ''),
+(NULL, 'select', 'translatable', 'translatable', 'translation-base', 'translation-single', 'col-md-2', '', '/application/selectbool', 0, 1, 0, '', 'OnePlace\\BoolSelect', '');
+
+--
+-- module icon
+--
+INSERT INTO `settings` (`settings_key`, `settings_value`) VALUES ('translation-icon', 'fas fa-language');
 
 COMMIT;

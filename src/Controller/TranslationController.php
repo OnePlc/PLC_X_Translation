@@ -105,7 +105,7 @@ class TranslationController extends CoreEntityController {
 
             # Log Performance in DB
             $aMeasureEnd = getrusage();
-            $this->logPerfomance('translation-add',$this->rutime($aMeasureEnd,CoreController::$aPerfomanceLogStart,"utime"),$this->rutime($aMeasureEnd,CoreController::$aPerfomanceLogStart,"stime"));
+            $this->logPerfomance('translation-add',$this->rutime($aMeasureEnd,CoreEntityController::$aPerfomanceLogStart,"utime"),$this->rutime($aMeasureEnd,CoreEntityController::$aPerfomanceLogStart,"stime"));
 
             return new ViewModel([
                 'sFormName' => $this->sSingleForm,
@@ -116,7 +116,7 @@ class TranslationController extends CoreEntityController {
         $aFormData = $this->parseFormData($_REQUEST);
 
         # Save Add Form
-        $oTranslation = new Translation(CoreController::$oDbAdapter);
+        $oTranslation = new Translation(CoreEntityController::$oDbAdapter);
         $oTranslation->exchangeArray($aFormData);
         $iTranslationID = $this->oTableGateway->saveSingle($oTranslation);
         $oTranslation = $this->oTableGateway->getSingle($iTranslationID);
@@ -131,7 +131,7 @@ class TranslationController extends CoreEntityController {
 
         # Log Performance in DB
         $aMeasureEnd = getrusage();
-        $this->logPerfomance('translation-save',$this->rutime($aMeasureEnd,CoreController::$aPerfomanceLogStart,"utime"),$this->rutime($aMeasureEnd,CoreController::$aPerfomanceLogStart,"stime"));
+        $this->logPerfomance('translation-save',$this->rutime($aMeasureEnd,CoreEntityController::$aPerfomanceLogStart,"utime"),$this->rutime($aMeasureEnd,CoreEntityController::$aPerfomanceLogStart,"stime"));
 
         # Display Success Message and View New Translation
         $this->flashMessenger()->addSuccessMessage('Translation successfully created');
@@ -191,7 +191,7 @@ class TranslationController extends CoreEntityController {
 
             # Log Performance in DB
             $aMeasureEnd = getrusage();
-            $this->logPerfomance('translation-edit',$this->rutime($aMeasureEnd,CoreController::$aPerfomanceLogStart,"utime"),$this->rutime($aMeasureEnd,CoreController::$aPerfomanceLogStart,"stime"));
+            $this->logPerfomance('translation-edit',$this->rutime($aMeasureEnd,CoreEntityController::$aPerfomanceLogStart,"utime"),$this->rutime($aMeasureEnd,CoreEntityController::$aPerfomanceLogStart,"stime"));
 
             return new ViewModel([
                 'sFormName' => $this->sSingleForm,
@@ -223,7 +223,7 @@ class TranslationController extends CoreEntityController {
 
         # Log Performance in DB
         $aMeasureEnd = getrusage();
-        $this->logPerfomance('translation-save',$this->rutime($aMeasureEnd,CoreController::$aPerfomanceLogStart,"utime"),$this->rutime($aMeasureEnd,CoreController::$aPerfomanceLogStart,"stime"));
+        $this->logPerfomance('translation-save',$this->rutime($aMeasureEnd,CoreEntityController::$aPerfomanceLogStart,"utime"),$this->rutime($aMeasureEnd,CoreEntityController::$aPerfomanceLogStart,"stime"));
 
         # Display Success Message and View New User
         $this->flashMessenger()->addSuccessMessage('Translation successfully saved');
@@ -277,7 +277,7 @@ class TranslationController extends CoreEntityController {
 
         # Log Performance in DB
         $aMeasureEnd = getrusage();
-        $this->logPerfomance('translation-view',$this->rutime($aMeasureEnd,CoreController::$aPerfomanceLogStart,"utime"),$this->rutime($aMeasureEnd,CoreController::$aPerfomanceLogStart,"stime"));
+        $this->logPerfomance('translation-view',$this->rutime($aMeasureEnd,CoreEntityController::$aPerfomanceLogStart,"utime"),$this->rutime($aMeasureEnd,CoreEntityController::$aPerfomanceLogStart,"stime"));
 
         return new ViewModel([
             'sFormName'=>$this->sSingleForm,
@@ -333,11 +333,11 @@ class TranslationController extends CoreEntityController {
         $sFile = "msgid \"\"\nmsgstr \"\"\n";
 
         # languages are translation categories so we need category tag
-        $oTag = CoreController::$aCoreTables['core-tag']->select(['tag_key'=>'category']);
+        $oTag = CoreEntityController::$aCoreTables['core-tag']->select(['tag_key'=>'category']);
         if(count($oTag)) {
             $oTag = $oTag->current();
 
-            $oEntityTag = CoreController::$aCoreTables['core-entity-tag']->select(['tag_idfs'=>$oTag->Tag_ID,'entity_form_idfs'=>'translation-single','tag_value'=>$sLang]);
+            $oEntityTag = CoreEntityController::$aCoreTables['core-entity-tag']->select(['tag_idfs'=>$oTag->Tag_ID,'entity_form_idfs'=>'translation-single','tag_value'=>$sLang]);
             if(count($oEntityTag) > 0) {
                 # load language (entity tag)
                 $oEntityTag = $oEntityTag->current();
